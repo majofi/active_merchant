@@ -31,6 +31,8 @@ require 'rexml/document'
 require 'active_merchant/common'
 require 'active_merchant/billing'
 
+
+
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:    
     autoload :Integrations, 'active_merchant/billing/integrations'

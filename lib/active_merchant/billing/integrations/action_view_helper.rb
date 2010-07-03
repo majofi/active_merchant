@@ -45,9 +45,9 @@ module ActiveMerchant #:nodoc:
           integration_module = ActiveMerchant::Billing::Integrations.const_get(options.delete(:service).to_s.classify)
 
           if ignore_binding?
-            concat(form_tag(integration_module.service_url, options.delete(:html) || {}))
+            concat(form_tag(integration_module.service_url(options), options.delete(:html) || {}))
           else
-            concat(form_tag(integration_module.service_url, options.delete(:html) || {}), proc.binding)
+            concat(form_tag(integration_module.service_url(options), options.delete(:html) || {}), proc.binding)
           end
           result = "\n"
           
