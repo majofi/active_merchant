@@ -59,14 +59,52 @@ module ActiveMerchant #:nodoc:
         return_xml = do_soap_request 'capture', xml
 
         data = REXML::Document.new(return_xml)
+        
+        status = REXML::XPath.first(data, "//status")
 
-        result = data
-
-        #TODO
-
-        #commit('capture', money, post)
+        if status.text == 'ERROR'
+          fault_code = REXML::XPath.first( data, "//retErrorcode").text
+          fault_msg = REXML::XPath.first( data, "//retErrorMsg").text
+          raise StandardError, 'unable to capture money  ' + fault_code + ' ' +fault_msg
+          true
+        else
+          if status.text == 'SUCCESS'
+            @trx_number = REXML::XPath.first( data, "//retTrxNumber").text
+            true
+          else
+            false
+          end
+        end
       end
 
+      def refund money, currency, transaction_id
+        xml = build_refund_request transaction_id, money, currency
+
+        return_xml = do_soap_request 'refund', xml
+
+        data = REXML::Document.new(return_xml)
+
+        status = REXML::XPath.first(data, "//status")
+
+        if status.text == 'ERROR'
+          fault_code = REXML::XPath.first( data, "//retErrorcode").text
+          fault_msg = REXML::XPath.first( data, "//retErrorMsg").text
+          raise StandardError, 'unable to refund money  ' + fault_code + ' ' +fault_msg
+          true
+        else
+          if status.text == 'SUCCESS'
+            @trx_number = REXML::XPath.first( data, "//retTrxNumber").text
+            true
+          else
+            false
+          end
+        end
+      end
+
+      #returns the last trx_number of the last call
+      def last_trx_number
+        @trx_number
+      end
 
       #calls ipayment webservice in order to create a
       #secure session id to identify account and amount
@@ -92,6 +130,12 @@ module ActiveMerchant #:nodoc:
       
 
       private                       
+
+      def build_refund_request transaction_id, money, currency
+        # both request look alike
+        build_capture_request(transaction_id, money, currency)
+
+      end
 
       def build_capture_request transaction_id, money, currency
         xml = Builder::XmlMarkup.new :indent => 2
@@ -121,6 +165,9 @@ module ActiveMerchant #:nodoc:
 
 
       def do_soap_request action, xml
+
+        @trx_number = nil
+
         req_headers= {
           'Content-Type' => 'text/xml; charset=utf-8',
           'Soapaction' => action,
@@ -135,7 +182,7 @@ module ActiveMerchant #:nodoc:
         xml.instruct!
         xml.tag! 'SOAP-ENV:Envelope', ENVELOPE_NAMESPACES do
           xml.tag! 'SOAP-ENV:Body' do
-            xml.tag! 'm:createSession', 'xmlns:m' => 'https://ipayment.de/service_v3/extern' do
+            xml.tag! 'm:' + action, 'xmlns:m' => 'https://ipayment.de/service_v3/extern' do
             #<m:createSession xmlns:m="https://ipayment.de/service_v3/extern">
             #xml.tag! action do
               xml.tag! 'accountData' do

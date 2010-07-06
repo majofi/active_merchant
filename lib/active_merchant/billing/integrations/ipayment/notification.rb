@@ -55,29 +55,11 @@ module ActiveMerchant #:nodoc:
             params['ret_status']
           end
 
-          # Acknowledge the transaction to Ipayment. This method has to be called after a new 
-          # apc arrives. Ipayment will verify that all the information we received are correct and will return a 
-          # ok or a fail. 
-          # 
-          # Example:
-          # 
-          #   def ipn
-          #     notify = IpaymentNotification.new(request.raw_post)
-          #
-          #     if notify.acknowledge 
-          #       ... process order ... if notify.complete?
-          #     else
-          #       ... log possible hacking attempt ...
-          #     end
+
           def acknowledge application_id
 
             #check trxuserid which is a secret to the user
             return params['trxuser_id'] == application_id
-          end
-
-          private
-          def parse(post)
-            @params = post
           end
 
         end
