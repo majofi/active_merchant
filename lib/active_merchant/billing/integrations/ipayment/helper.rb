@@ -32,9 +32,6 @@ module ActiveMerchant #:nodoc:
                                                       error_url)
             add_field('ipayment_session_id', session_id)
 
-            add_field('trx_currency', 'EUR') #TODO
-            #add_field('trx_typ', 'preauth') #only authorisation, capture is done later via soap call (gateway) "ipayment_session_used
-            
             add_field('silent', '1') #use silent cgi mode
             if ActiveMerchant::Billing::Base.integration_mode == :test
               #remove double transaction check in test mode
@@ -43,7 +40,8 @@ module ActiveMerchant #:nodoc:
             add_field('return_paymentdata_details', 1)
           end
 
-          #TODO
+          mapping :currency, 'trx_currency'
+
           mapping :amount, 'trx_amount'
        
           mapping :billing_address, :city     => 'addr_city',

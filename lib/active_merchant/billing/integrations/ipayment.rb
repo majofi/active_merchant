@@ -5,31 +5,55 @@ module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     module Integrations #:nodoc:
 
-#TODO
-      # The notify_url is the URL that the Nochex IPN will be sent.  You can
-      # handle the notification in your controller action as follows:
-      #
-      #   class NotificationController < ApplicationController
-      #     include ActiveMerchant::Billing::Integrations
-      #
-      #     def notify
-      #       notification =  Nochex::Notification.new(request.raw_post)
-      #
-      #       begin
-      #         # Acknowledge notification with Nochex
-      #         raise StandardError, 'Illegal Notification' unless notification.acknowledge
-      #           # Process the payment
-      #       rescue => e
-      #           logger.warn("Illegal notification received: #{e.message}")
-      #       ensure
-      #           head(:ok)
-      #       end
-      #     end
-      #   end
+=begin
+  ==USAGE:
+
+  in template do:
+  <% payment_service_for 1, 'foo', :service => 'ipayment',
+                                 :amount => 50,
+                                 :currency => 'EUR',
+                                 :account_id => '99999',
+                                 :application_id => '99999',
+                                 :application_pw => '0',
+                                 :admin_pw => '5cfgRT34xsdedtFLdfHxj7tfwx24fe',
+                                 :redirect_url => url_for(:action => 'success', :only_path => false),
+                                 :error_url => url_for(:action => 'error', :only_path => false) do |service| %>
+                                 end
+
+    <% service.billing_address :city => 'Landau',
+                               :address1 => 'Queichstr. 12',
+                               :address2 => '',
+                               :state => '',
+                               :zip => '76829',
+                               :country => 'DE'%>
+
+    Name: <%= text_field_tag 'addr_name' %>
+    CC number: <%= text_field_tag 'cc_number' %>
+    Exp Date Month: <%= text_field_tag 'cc_expdate' %>
+    Exp Date Year: <%= text_field_tag 'cc_expdate_year' %>
+    CVC Checkcode: <%= text_field_tag 'cc_checkcode' %>
+
+    <%=  submit_tag 'go' %>
+  <% end %>
 
 
+  in the success action of your controller do:
+
+  notify = Ipayment::Notification.new(request.raw_post)
+  if notify.acknowledge '99999' #application_id
+    if notify.complete?
+      #everything went fine
+      transaction_id = notify.transaction_id
+    end
+  end
+
+
+
+=end
+      
       module Ipayment 
 
+        #data to test ipayment service
         TEST_ACCOUNT_ID = '99999'
         TEST_APPLICATION_ID = '99999'
         TEST_APPLICATION_PW = '0'

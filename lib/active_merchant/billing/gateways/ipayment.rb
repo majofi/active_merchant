@@ -2,6 +2,34 @@ module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     class IpaymentGateway < Gateway
 
+=begin
+  ==USAGE:
+
+  gw = ActiveMerchant::Billing::IpaymentGateway.new(:account_id => '99999',
+                                                   :application_id => '99999',
+                                                   :application_pw => '0',
+                                                   :admin_pw => '5cfgRT34xsdedtFLdfHxj7tfwx24fe')
+
+  #do a capture
+  begin
+    if gw.capture(50, 'EUR', trx_number) #trx_number is the transaction number of your preauth call (see ipayment integration)
+      id_of_the_transaction = gw.last_trx_number
+    end
+  rescue
+    #there was an error
+  end
+
+  #do a refund (after successfull capture
+  begin
+    if gw.refund(50, 'EUR', trx_number) #trx_number is the transaction number of capture call
+      id_of_the_transaction = gw.last_trx_number
+    end
+  rescue
+    #there was an error
+  end
+=end
+
+
       SERVICE_URL = 'https://ipayment.de/service/3.0/'
 
       ENVELOPE_NAMESPACES = { 'xmlns:xsd' => 'http://www.w3.org/2001/XMLSchema',
@@ -31,25 +59,11 @@ module ActiveMerchant #:nodoc:
         #not possible without PCI , use the "integration"
         raise StandardError, 'No authorisation possible, use integration'
 
-        #post = {}
-        #add_invoice(post, options)
-        #add_creditcard(post, creditcard)
-        #add_address(post, creditcard, options)
-        #add_customer_data(post, options)
-        
-        #commit('authonly', money, post)
       end
       
       def purchase(money, creditcard, options = {})
+        #not possible without PCI , use the "integration"
         raise StandardError, 'No purchase possible, use integration'
-
-        #post = {}
-        #add_invoice(post, options)
-        #add_creditcard(post, creditcard)
-        #add_address(post, creditcard, options)
-        #add_customer_data(post, options)
-             
-        #commit('sale', money, post)
       end                       
     
       def capture(money, currency, transaction_id)
